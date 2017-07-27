@@ -10,4 +10,4 @@ if __name__ == '__main__':
     p.join()
     print("Done")
 
-# Hello from Pål
+# Hello from Pål :)
