@@ -10,4 +10,4 @@ if __name__ == '__main__':
     p.join()
     print("Done")
 
-# Test the other way
+# Hello from Pål :)
