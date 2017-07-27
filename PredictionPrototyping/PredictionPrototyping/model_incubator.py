@@ -24,7 +24,7 @@ for generation in range(config.num_generations):
     for ind in range(len(current_generation)):
         individual = current_generation[ind]
         print("%s: \t New individual spawning... " % (datetime.now().strftime('%X')))
-        dataset = rnn.LSTM_Dataset(folder_name = "P:/StudentSummerProject2017/SummerProject_OTS/Compiled/26.07/clean/TurbinB", 
+        dataset = rnn.LSTM_Dataset(folder_name = "C:/Users/Fredrik/Documents/WashedData/TurbinA", 
                            min_cycle_size = 2400, 
                            target_ranges = individual['target_ranges'], 
                            reuse_factor = 30, 

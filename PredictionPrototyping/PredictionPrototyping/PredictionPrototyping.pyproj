@@ -21,7 +21,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="model_genotype.py" />
+    <Compile Include="model_incubator.py" />
+    <Compile Include="network_adapter.py" />
     <Compile Include="PredictionPrototyping.py" />
+    <Compile Include="prototype.py" />
+    <Compile Include="rnn_network.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
