@@ -24,6 +24,8 @@ class network_adapter:
         self.interpolated_data = [[float(i) for i in row[1:]] for row in csvInterpoData]
         self.data_dimension = len(self.interpolated_data[0])
 
+        # Scale the size of the inputs with some pre-defined scaler array
+
         csvTripTimeNew = csv.reader(open(self.folder_name+"/tripTimeNew.csv"))
         next(csvTripTimeNew)
         self.new_cycle_idxs = [int(row[1]) for row in csvTripTimeNew]

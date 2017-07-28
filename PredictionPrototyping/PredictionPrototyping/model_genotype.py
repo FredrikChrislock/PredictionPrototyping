@@ -91,7 +91,7 @@ class model_genotype:
         x = 0
         end_index = 0
         while x < max_ranges:
-            start_index = end_index + rnd.randint(min_range, max_range)
+            start_index = end_index + rnd.randint(0, min_range)
             end_index = start_index + rnd.randint(min_range, max_range)
             if end_index > max_lead_time:
                 break
@@ -163,7 +163,7 @@ class model_genotype:
 
     def create_random_window(self, warning_time, max_target_range):
 
-        return rnd.randint(warning_time*2, int(max_target_range*1.5))
+        return rnd.randint(warning_time*2, int(max_target_range*2))
 
     def spawn_genome(self, config):
         return {'ffwd_layers' : self.create_random_multilayer(config.min_num_lstm_layers,
