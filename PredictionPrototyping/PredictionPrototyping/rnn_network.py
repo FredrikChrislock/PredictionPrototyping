@@ -28,10 +28,10 @@ class LSTM_Dataset:
         lead_time = target_ranges[-1][1]
         phase = min_cycle_size - lead_time
         # Generate base target
-        base_target = np.zeros(shape = (self.output_dimension, min_cycle_size))
+        self.base_target = np.zeros(shape = (self.output_dimension, min_cycle_size))
         for i in range(len(target_ranges)):
             _range = target_ranges[i]
-            base_target[i,phase+_range[0]:phase+_range[1]] = np.ones(shape=(1,_range[1]-_range[0]))
+            self.base_target[i,phase+_range[0]:phase+_range[1]] = np.ones(shape=(1,_range[1]-_range[0]))
 
         # Sample random segments from each cycle 
         max_start_index = min_cycle_size-window_size
@@ -44,11 +44,11 @@ class LSTM_Dataset:
         for i in range(self.num_cycles):
             cycle = cycles[i]
             for _ in range(reuse_factor):
-                idx = rnd.randint(0, max_start_index)
+                idx = rnd.randint(max_start_index-int(window_size/2), max_start_index)
                 sample = cycle[idx:idx+window_size]
                 sample = np.array(sample, dtype=np.float32)
 
-                target = base_target[:,idx:idx+window_size]
+                target = self.base_target[:,idx:idx+window_size]
                 if train_or_test[i] == 'Train':
                     self.training_set += [(sample, target)]
                 elif train_or_test[i] == 'Test':
@@ -82,10 +82,6 @@ class LSTM_Dataset:
         # Any target class gets values dependent on two things:
         # 1. How long from a trip the class is ([0,1) proportional with max_lead_time)
         # 2. How wide a range the class covers ([0,1) inversely proportional with the covering ratio for the class
-
-
-
-
 
 
 class LSTM_Network:
@@ -156,21 +152,24 @@ if __name__== "__main__":
     config = genotype.model_genotype_config()
     spawner = genotype.model_genotype()
     individual = spawner.spawn_genome(config)
-    dataset = LSTM_Dataset(folder_name = "P:/StudentSummerProject2017/SummerProject_OTS/InterpolatedData/TurbinB/", 
-                           min_cycle_size = 60*24*7, 
+    dataset = LSTM_Dataset(folder_name = "P:/StudentSummerProject2017/SummerProject_OTS/Compiled/26.07/clean/TurbinB", 
+                           min_cycle_size = 60*12, 
                            target_ranges = individual['target_ranges'], 
-                           reuse_factor = 500, 
+                           reuse_factor = 10, 
                            window_size = individual['window_size'])
 
-    batch_size = 4
-    batch = dataset.draw_batch(batch_size)
-
-    network = LSTM_Network(input_size = dataset.input_dimension,
-                           output_size = dataset.output_dimension,
-                           num_steps = individual['window_size'],
-                           batch_size = batch_size,
-                           lstm_layers = individual['lstm_layers'],
-                           ffwd_layers = individual['ffwd_layers'],
-                           learning_rate = config.max_learning_rate)
+    batch = dataset.draw_train_batch(config.batch_size)
+    for i in range(config.batch_size):
+                plt.figure("Test #%i" % (i))
+                num_classes = len(individual['target_ranges'])
+                for j in range(num_classes):
+                    plt.subplot(num_classes, 1, j+1)
+                    plt.plot(batch[1][i,:,j])
+    plt.figure("Base target")
+    num_classes = len(individual['target_ranges'])
+    for j in range(num_classes):
+        plt.subplot(num_classes, 1, j+1)
+        plt.plot(dataset.base_target[j,:])
+    plt.show()
 
     exit()
