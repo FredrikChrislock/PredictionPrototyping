@@ -17,9 +17,11 @@ class model_genotype_config:
     min_target_range = 30
     max_target_range = 60
     max_lead_time = 60*6 # minutes
+    max_geo_coefficient = 2.5
     max_learning_rate = 0.1
     min_learning_rate = 0.001
-    warning_time = 30
+    min_warning_time = 15
+    max_warning_time = 30
 
     momentum = 0.9
     batch_size = 16
@@ -161,6 +163,21 @@ class model_genotype:
 
         return 0 # NOT IMPLEMENTED
 
+    def create_random_geo_ranges(self, min_warning_time, max_warning_time, max_geo_coefficient):
+        warning_time = rnd.randint(min_warning_time,max_warning_time)
+        geo_coefficient = 1 + (max_geo_coefficient-1)*rnd.random_sample()
+        return (warning_time, geo_coefficient)
+        #ranges = []
+        #n = 0
+        #idx = 0
+        #while idx + warning_time + coefficient**n < max_lead_time:
+        #    n += 1
+        #    next_idx = idx + warning_time + coefficient**n
+        #    ranges += [[idx, next_idx]]
+        #    idx = next_idx
+        #return ranges
+
+
     def create_random_window(self, warning_time, max_target_range):
 
         return rnd.randint(warning_time*2, int(max_target_range*2))
@@ -181,7 +198,7 @@ class model_genotype:
                                                             config.min_target_range, 
                                                             config.max_target_range),
 
-                'window_size' : self.create_random_window(config.warning_time,
+                'window_size' : self.create_random_window(config.min_warning_time,
                                                           config.max_lead_time)}
 
     def mutate_genome(self, config, genome):
