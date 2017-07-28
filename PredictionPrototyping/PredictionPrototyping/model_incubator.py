@@ -24,7 +24,7 @@ for generation in range(config.num_generations):
     for ind in range(len(current_generation)):
         individual = current_generation[ind]
         print("%s: \t New individual spawning... " % (datetime.now().strftime('%X')))
-        dataset = rnn.LSTM_Dataset(folder_name = "C:/Users/Fredrik/Documents/WashedData/TurbinA", 
+        dataset = rnn.LSTM_Dataset(folder_name = "P:/StudentSummerProject2017/SummerProject_OTS/Compiled/26.07/clean/TurbinB", 
                            min_cycle_size = 2400, 
                            target_ranges = individual['target_ranges'], 
                            reuse_factor = 30, 
@@ -55,9 +55,15 @@ for generation in range(config.num_generations):
                 _predictions, _loss = sess.run([predictions, loss], feed_dict= {input: batch[0],
                                                    target: batch[1]})
                 print("%s: \t %i'th epoch. Loss: %f" % (datetime.now().strftime('%X'), e+1, _loss))
-            plt.figure()
-            for i in range(4):
-                plt.subplot(4,1,i+1)
+
+            for i in range(config.batch_size):
+                plt.figure("Test #%i" % (i))
+                num_classes = len(individual['target_ranges'])
+                for j in range(num_classes):
+                    plt.subplot(num_classes, 1, j+1)
+                    plt.plot(_predictions[i,:,j])
+                    plt.plot(batch[1][i,:,j])
+            plt.show()
 
             generation_scores[ind] = _loss
             scores[generation, ind] = _loss
