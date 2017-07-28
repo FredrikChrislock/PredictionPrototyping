@@ -52,9 +52,13 @@ for generation in range(config.num_generations):
                     #print("%s: \t %i'th iteration. Loss: %f" % (datetime.now().strftime('%X'), i, _loss))
                 # Test with one batch
                 batch = dataset.draw_test_batch(config.batch_size)
-                _loss = sess.run(loss, feed_dict= {input: batch[0],
+                _predictions, _loss = sess.run([predictions, loss], feed_dict= {input: batch[0],
                                                    target: batch[1]})
                 print("%s: \t %i'th epoch. Loss: %f" % (datetime.now().strftime('%X'), e+1, _loss))
+            plt.figure()
+            for i in range(4):
+                plt.subplot(4,1,i+1)
+
             generation_scores[ind] = _loss
             scores[generation, ind] = _loss
 
