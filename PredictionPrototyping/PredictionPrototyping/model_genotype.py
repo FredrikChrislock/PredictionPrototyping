@@ -1,35 +1,51 @@
 import numpy as np
 import numpy.random as rnd
+import auto_encoder as adc
+import matplotlib.pyplot as plt
 
 # List of parameters needed for one model
 class model_genotype_config:
+
+    ## INPUT CHROMOSOME
+    input_min_num_ranges = 10
+    input_max_num_ranges = 50
+    input_min_size_range = 1 # power of two
+    input_max_size_range = 2 # power of two
+
+    ## MODEL CHROMOSOME
     min_num_lstm_layers = 2
-    max_num_lstm_layers = 6
+    max_num_lstm_layers = 3
     min_lstm_layer_size = 2 # power of two
-    max_lstm_layer_size = 8 # power of two
+    max_lstm_layer_size = 4 # power of two
 
     min_num_ffwd_layers = 2
-    max_num_ffwd_layers = 6
+    max_num_ffwd_layers = 3
     min_ffwd_layer_size = 2 # power of two
-    max_ffwd_layer_size = 8 # power of two
+    max_ffwd_layer_size = 4 # power of two
 
-    max_target_ranges = 10
-    min_target_range = 30
-    max_target_range = 60
-    max_lead_time = 60*6 # minutes
-    max_learning_rate = 0.1
-    min_learning_rate = 0.001
-    warning_time = 30
 
+    ## TARGET CHROMOSOME
+    min_target_range = 20   # minutes
+    max_target_range = 60   # minutes
+    max_lead_time = 60*3    # minutes
+    warning_time = 30       # minutes
+
+    ## TRAINING CHROMOSOME
     momentum = 0.9
+    max_learning_rate = 0.05
+    min_learning_rate = 0.01
     batch_size = 16
-    num_batches = 50
-    num_epochs = 8
+    num_batches = 20
+    reuse_factor = 6
 
+    ## INCUBATOR SETTINGS
+    num_epochs = 20
     mutation_rate = 0.9
     crossover_rate = 0.5
     population_size = 10
     num_generations = 5
+    min_cycle_size = 60*4
+    folder_name = 'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
 
 # Create a genome based on the above specifications
 class model_genotype:
@@ -86,17 +102,16 @@ class model_genotype:
             distance += sum(layers0[i+1:])
         return distance
 
-    def create_random_ranges(self, max_lead_time, max_ranges, min_range, max_range):
+    def create_random_ranges(self, max_lead_time, min_range, max_range):
         ranges = []
         x = 0
-        end_index = 0
-        while x < max_ranges:
-            start_index = end_index + rnd.randint(0, min_range)
-            end_index = start_index + rnd.randint(min_range, max_range)
+        start_index = 0
+        while True:
+            end_index = start_index + rnd.randint(min_range,max_range)
             if end_index > max_lead_time:
                 break
             ranges += [[start_index, end_index]]
-            x += 1
+            start_index = end_index
         return ranges
     def mutate_ranges(self, max_lead_time, max_ranges, min_range, max_range, ranges, mutation_rate):
         output = ranges
@@ -161,9 +176,9 @@ class model_genotype:
 
         return 0 # NOT IMPLEMENTED
 
-    def create_random_window(self, warning_time, max_target_range):
+    def create_random_window(self, minimum, maximum):
 
-        return rnd.randint(warning_time*2, int(max_target_range*2))
+        return rnd.randint(minimum, maximum)
 
     def spawn_genome(self, config):
         return {'ffwd_layers' : self.create_random_multilayer(config.min_num_lstm_layers,
@@ -176,13 +191,12 @@ class model_genotype:
                                                               config.min_ffwd_layer_size, 
                                                               config.max_ffwd_layer_size),
 
-                'target_ranges' : self.create_random_ranges(config.max_lead_time, 
-                                                            config.max_target_ranges, 
+                'target_ranges' : self.create_random_ranges(config.max_lead_time,  
                                                             config.min_target_range, 
                                                             config.max_target_range),
 
-                'window_size' : self.create_random_window(config.warning_time,
-                                                          config.max_lead_time)}
+                'window_size' : self.create_random_window(15,
+                                                          config.min_target_range)}
 
     def mutate_genome(self, config, genome):
         output = genome
@@ -234,5 +248,15 @@ class model_genotype:
 if __name__ == '__main__':
     config = model_genotype_config()
     spawner = model_genotype()
-    individual = spawner.spawn_genome(config)
+    auto_encoder = adc.auto_encoder('C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData')
+    ranges = [spawner.create_random_multilayer(config.input_min_num_ranges, 
+                                               config.input_max_num_ranges,
+                                               config.input_min_size_range,
+                                               config.input_max_size_range) for _ in range(auto_encoder.num_dimensions)]
+    scaler = [scale if rnd.random() < 0.5 else 0 for scale in auto_encoder.scaler]
+    encoded_time_series = auto_encoder.export_cycles(scaler, ranges, 400)
+
+    plt.figure()
+    plt.imshow(encoded_time_series[0], cmap='gray')
+    plt.show()
     exit()

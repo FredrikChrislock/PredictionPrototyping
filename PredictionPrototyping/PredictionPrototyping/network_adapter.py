@@ -22,7 +22,7 @@ class network_adapter:
         csvInterpoData = csv.reader(open(self.folder_name+"/interpoData.csv"))
         next(csvInterpoData)
         self.interpolated_data = [[float(i) for i in row[1:]] for row in csvInterpoData]
-        self.data_dimension = len(self.interpolated_data[0])
+        self.num_dimensions = len(self.interpolated_data[0])
 
         # Scale the size of the inputs with some pre-defined scaler array
 

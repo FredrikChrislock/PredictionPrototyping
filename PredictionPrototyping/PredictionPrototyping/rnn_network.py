@@ -12,30 +12,38 @@ import network_adapter as net_adapter
 
 import model_genotype as genotype
 
+import auto_encoder as adc
 
 """ 
 Class for storing and delivering training sets, test sets and validation sets to the neural network
 """
 class LSTM_Dataset:
-    def __init__(self, folder_name, min_cycle_size, target_ranges, reuse_factor, window_size):
-        adapter = net_adapter.network_adapter(folder_name = folder_name,
-                                              window_size = min_cycle_size)
-        self.target_ranges = target_ranges
-        self.input_dimension = adapter.data_dimension
-        self.output_dimension = len(target_ranges)
+    def __init__(self, config, genome):
+        #adapter = net_adapter.network_adapter(folder_name = folder_name,
+        #                                      window_size = min_cycle_size)
+        spawner = genotype.model_genotype()
+        encoder = adc.auto_encoder(folder_name = config.folder_name)
+        ranges = [spawner.create_random_multilayer(config.input_min_num_ranges, 
+                                               config.input_max_num_ranges,
+                                               config.input_min_size_range,
+                                               config.input_max_size_range) for _ in range(encoder.num_dimensions)]
+        scaler = [scale if rnd.random() < 1 else 0 for scale in encoder.scaler]
+        cycles = encoder.export_cycles(scaler, ranges, config.min_cycle_size)
+        self.target_ranges = genome['target_ranges']
+        self.input_dimension = len(cycles[0])
+        self.output_dimension = len(self.target_ranges)
         # Define scaling factors for evaluation. Class scores should be attenuated proportionally to the span of the class
-        self.class_spans = [x[1]-x[0] for x in target_ranges]
-        lead_time = target_ranges[-1][1]
-        phase = min_cycle_size - lead_time
+        self.class_spans = [x[1]-x[0] for x in self.target_ranges]
+        lead_time = self.target_ranges[-1][1]
+        phase = config.min_cycle_size - lead_time
         # Generate base target
-        self.base_target = np.zeros(shape = (self.output_dimension, min_cycle_size))
-        for i in range(len(target_ranges)):
-            _range = target_ranges[i]
-            self.base_target[i,phase+_range[0]:phase+_range[1]] = np.ones(shape=(1,_range[1]-_range[0]))
+        self.base_target = np.zeros(shape = (self.output_dimension, lead_time))
+        for i in range(len(self.target_ranges)):
+            _range = self.target_ranges[i]
+            self.base_target[i,_range[0]:_range[1]] = np.ones(shape=(1,_range[1]-_range[0]))
 
         # Sample random segments from each cycle 
-        max_start_index = min_cycle_size-window_size
-        cycles = adapter.cycles
+        max_start_index = config.min_cycle_size-genome['window_size']
         self.num_cycles = len(cycles)
         train_or_test = ['Train' for _ in range(int(np.ceil(self.num_cycles/2)))] + ['Test' for _ in range(int(np.floor(self.num_cycles/2)))]
         train_or_test = rnd.permutation(train_or_test)
@@ -43,12 +51,12 @@ class LSTM_Dataset:
         self.testing_set = []
         for i in range(self.num_cycles):
             cycle = cycles[i]
-            for _ in range(reuse_factor):
-                idx = rnd.randint(max_start_index-int(window_size/2), max_start_index)
-                sample = cycle[idx:idx+window_size]
+            for _ in range(config.reuse_factor):
+                idx = rnd.randint(phase, max_start_index)
+                sample = cycle[:,idx:idx+genome['window_size']]
                 sample = np.array(sample, dtype=np.float32)
 
-                target = self.base_target[:,idx:idx+window_size]
+                target = self.base_target[:,idx-phase:idx+genome['window_size']-phase]
                 if train_or_test[i] == 'Train':
                     self.training_set += [(sample, target)]
                 elif train_or_test[i] == 'Test':
@@ -62,6 +70,7 @@ class LSTM_Dataset:
             input_batch += [self.training_set[idx][0]]
             target_batch += [self.training_set[idx][1]]
         input_batch = np.stack(input_batch)
+        input_batch = np.transpose(input_batch, [0, 2, 1])
         target_batch = np.stack(target_batch)
         target_batch = np.transpose(target_batch, [0, 2, 1])
         return (input_batch, target_batch)
@@ -74,6 +83,7 @@ class LSTM_Dataset:
             input_batch += [self.testing_set[idx][0]]
             target_batch += [self.testing_set[idx][1]]
         input_batch = np.stack(input_batch)
+        input_batch = np.transpose(input_batch, [0, 2, 1])
         target_batch = np.stack(target_batch)
         target_batch = np.transpose(target_batch, [0, 2, 1])
         return (input_batch, target_batch)
@@ -152,11 +162,7 @@ if __name__== "__main__":
     config = genotype.model_genotype_config()
     spawner = genotype.model_genotype()
     individual = spawner.spawn_genome(config)
-    dataset = LSTM_Dataset(folder_name = "P:/StudentSummerProject2017/SummerProject_OTS/Compiled/26.07/clean/TurbinB", 
-                           min_cycle_size = 60*12, 
-                           target_ranges = individual['target_ranges'], 
-                           reuse_factor = 10, 
-                           window_size = individual['window_size'])
+    dataset = LSTM_Dataset(config, individual)
 
     batch = dataset.draw_train_batch(config.batch_size)
     for i in range(config.batch_size):
