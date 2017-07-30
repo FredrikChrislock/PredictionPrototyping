@@ -45,8 +45,8 @@ class model_genotype_config:
     population_size = 10
     num_generations = 5
     min_cycle_size = 60*6
-    folder_name = 'C:/Users/Fredrik/Documents/WashedData/TurbinA'
-
+    folder_name = 'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
+    #'C:/Users/Fredrik/Documents/WashedData/TurbinA'
 # Create a genome based on the above specifications
 class model_genotype:
 
@@ -180,8 +180,20 @@ class model_genotype:
 
         return rnd.randint(minimum, maximum)
 
-    def spawn_genome(self, config):
-        return {'ffwd_layers' : self.create_random_multilayer(config.min_num_lstm_layers,
+    def create_random_one_hot_quantizer(self, num_dimensions, min_resolution, max_resolution, max_sqew):
+        ranges = [self.create_random_multilayer(min_resolution, 
+                                                max_resolution,
+                                                1,
+                                                max_sqew) for _ in range(num_dimensions)]
+        return ranges
+
+    def spawn_genome(self, config, num_dimensions):
+        return {'input_ranges' : self.create_random_one_hot_quantizer(num_dimensions, 
+                                                               config.input_min_num_ranges,
+                                                               config.input_max_num_ranges,
+                                                               config.input_max_size_range),
+
+                'ffwd_layers' : self.create_random_multilayer(config.min_num_lstm_layers,
                                                               config.max_num_lstm_layers,
                                                               config.min_lstm_layer_size,
                                                               config.max_lstm_layer_size),

@@ -13,8 +13,9 @@ import auto_encoder as adc
 # Spawn initial population
 config = gen.model_genotype_config()
 spawner = gen.model_genotype()
+encoder = adc.auto_encoder(folder_name = config.folder_name)
 
-current_generation = [spawner.spawn_genome(config) for _ in range(config.population_size)]
+current_generation = [spawner.spawn_genome(config, encoder.num_dimensions) for _ in range(config.population_size)]
 
 # For some predifined criterion; train, evaluate, select for sexual reproduction, mate and spawn new population
 scores = np.zeros(shape=[config.num_generations, config.population_size])
@@ -25,8 +26,7 @@ for generation in range(config.num_generations):
     for ind in range(len(current_generation)):
         individual = current_generation[ind]
         print("%s: \t New individual spawning... " % (datetime.now().strftime('%X')))
-        dataset = rnn.LSTM_Dataset(config,individual)
-        print(dataset.num_cycles)
+        dataset = rnn.LSTM_Dataset(encoder, config, individual)
         graph = tf.Graph()
         with graph.as_default():
             network = rnn.LSTM_Network(input_size = dataset.input_dimension,

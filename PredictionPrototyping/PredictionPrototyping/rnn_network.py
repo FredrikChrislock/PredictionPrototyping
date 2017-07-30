@@ -18,15 +18,10 @@ import auto_encoder as adc
 Class for storing and delivering training sets, test sets and validation sets to the neural network
 """
 class LSTM_Dataset:
-    def __init__(self, config, genome):
+    def __init__(self, encoder, config, genome):
         #adapter = net_adapter.network_adapter(folder_name = folder_name,
         #                                      window_size = min_cycle_size)
-        spawner = genotype.model_genotype()
-        encoder = adc.auto_encoder(folder_name = config.folder_name)
-        ranges = [spawner.create_random_multilayer(config.input_min_num_ranges, 
-                                               config.input_max_num_ranges,
-                                               config.input_min_size_range,
-                                               config.input_max_size_range) for _ in range(encoder.num_dimensions)]
+        ranges = genome['input_ranges']
         scaler = [scale if rnd.random() < 1 else 0 for scale in encoder.scaler]
         cycles = encoder.export_cycles(scaler, ranges, config.min_cycle_size)
         self.target_ranges = genome['target_ranges']
