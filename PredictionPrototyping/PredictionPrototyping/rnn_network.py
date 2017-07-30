@@ -28,8 +28,8 @@ class LSTM_Dataset:
         self.input_dimension = len(cycles[0])
         self.output_dimension = len(self.target_ranges)
         # Define scaling factors for evaluation. Class scores should be attenuated proportionally to the span of the class
-        self.class_spans = [x[1]-x[0] for x in self.target_ranges]
-        lead_time = self.target_ranges[-1][1]
+        #self.class_spans = [x[1]-x[0] for x in self.target_ranges]
+        lead_time = self.target_ranges[-1]
         phase = config.min_cycle_size - lead_time
 
         # Generate base target
