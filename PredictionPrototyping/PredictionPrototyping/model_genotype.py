@@ -45,8 +45,9 @@ class model_genotype_config:
     population_size = 10
     num_generations = 5
     min_cycle_size = 60*6
-    folder_name = 'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
+    folder_name = 'C:/Users/Fredrik/Documents/WashedData/TurbinA'
     #'C:/Users/Fredrik/Documents/WashedData/TurbinA'
+    #'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
 # Create a genome based on the above specifications
 class model_genotype:
 
@@ -103,14 +104,13 @@ class model_genotype:
         return distance
 
     def create_random_ranges(self, max_lead_time, min_range, max_range):
-        ranges = []
-        x = 0
+        ranges = [0]
         start_index = 0
         while True:
             end_index = start_index + rnd.randint(min_range,max_range)
             if end_index > max_lead_time:
                 break
-            ranges += [[start_index, end_index]]
+            ranges += [end_index]
             start_index = end_index
         return ranges
     def mutate_ranges(self, max_lead_time, max_ranges, min_range, max_range, ranges, mutation_rate):

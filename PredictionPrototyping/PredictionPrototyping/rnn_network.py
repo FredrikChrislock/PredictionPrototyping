@@ -31,10 +31,11 @@ class LSTM_Dataset:
         self.class_spans = [x[1]-x[0] for x in self.target_ranges]
         lead_time = self.target_ranges[-1][1]
         phase = config.min_cycle_size - lead_time
+
         # Generate base target
         self.base_target = np.zeros(shape = (self.output_dimension, lead_time))
-        for i in range(len(self.target_ranges)):
-            _range = self.target_ranges[i]
+        for i in range(1, len(self.target_ranges)):
+            _range = self.target_ranges[i-1:i]
             self.base_target[i,_range[0]:_range[1]] = np.ones(shape=(1,_range[1]-_range[0]))
 
         # Sample random segments from each cycle 
@@ -150,8 +151,6 @@ class LSTM_Network:
     def lstm_model(self):
 
         return self.input_tensor, self.target_output, self.predictions, self.loss, self.trainer
-
-    
 
 
 
