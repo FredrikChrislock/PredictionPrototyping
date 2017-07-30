@@ -45,7 +45,7 @@ class model_genotype_config:
     population_size = 10
     num_generations = 5
     min_cycle_size = 60*6
-    folder_name = 'C:/Users/Fredrik/Documents/WashedData/TurbinA'
+    folder_name = 'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
     #'C:/Users/Fredrik/Documents/WashedData/TurbinA'
     #'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
 # Create a genome based on the above specifications

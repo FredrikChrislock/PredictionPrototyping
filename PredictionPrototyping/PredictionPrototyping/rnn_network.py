@@ -28,14 +28,14 @@ class LSTM_Dataset:
         self.input_dimension = len(cycles[0])
         self.output_dimension = len(self.target_ranges)
         # Define scaling factors for evaluation. Class scores should be attenuated proportionally to the span of the class
-        self.class_spans = [x[1]-x[0] for x in self.target_ranges]
-        lead_time = self.target_ranges[-1][1]
+        #self.class_spans = [x[1]-x[0] for x in self.target_ranges]
+        lead_time = self.target_ranges[-1]
         phase = config.min_cycle_size - lead_time
 
         # Generate base target
         self.base_target = np.zeros(shape = (self.output_dimension, lead_time))
         for i in range(1, len(self.target_ranges)):
-            _range = self.target_ranges[i-1:i]
+            _range = self.target_ranges[i-1:i+1]
             self.base_target[i,_range[0]:_range[1]] = np.ones(shape=(1,_range[1]-_range[0]))
 
         # Sample random segments from each cycle 
@@ -155,10 +155,12 @@ class LSTM_Network:
 
 
 if __name__== "__main__":
+
     config = genotype.model_genotype_config()
     spawner = genotype.model_genotype()
-    individual = spawner.spawn_genome(config)
-    dataset = LSTM_Dataset(config, individual)
+    encoder = adc.auto_encoder(folder_name = config.folder_name)
+    individual = spawner.spawn_genome(config, encoder.num_dimensions)
+    dataset = LSTM_Dataset(encoder, config, individual)
 
     batch = dataset.draw_train_batch(config.batch_size)
     for i in range(config.batch_size):
