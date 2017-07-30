@@ -64,6 +64,7 @@ for generation in range(config.num_generations):
                 for j in range(num_classes):
                     plt.subplot(num_classes, 1, j+1)
                     plt.plot(_predictions[i,:,j])
+                    plt.ylim(-0.5,1.5)
                     plt.plot(batch[1][i,:,j])
             plt.show()
 
