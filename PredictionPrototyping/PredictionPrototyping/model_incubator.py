@@ -26,6 +26,7 @@ for generation in range(config.num_generations):
         individual = current_generation[ind]
         print("%s: \t New individual spawning... " % (datetime.now().strftime('%X')))
         dataset = rnn.LSTM_Dataset(config,individual)
+        print(dataset.num_cycles)
         graph = tf.Graph()
         with graph.as_default():
             network = rnn.LSTM_Network(input_size = dataset.input_dimension,
@@ -51,7 +52,11 @@ for generation in range(config.num_generations):
                 batch = dataset.draw_train_batch(config.batch_size)
                 _predictions, _loss = sess.run([predictions, loss], feed_dict= {input: batch[0],
                                                    target: batch[1]})
-                print("%s: \t %i'th epoch. Loss: %f" % (datetime.now().strftime('%X'), e+1, _loss))
+                print("%s: \t %i'th epoch. Traning loss: %f" % (datetime.now().strftime('%X'), e+1, _loss))
+                batch = dataset.draw_test_batch(config.batch_size)
+                _predictions, _loss = sess.run([predictions, loss], feed_dict= {input: batch[0],
+                                                   target: batch[1]})
+                print("%s: \t %i'th epoch. Testing loss: %f" % (datetime.now().strftime('%X'), e+1, _loss))
 
             for i in range(config.batch_size):
                 plt.figure("Test #%i" % (i))

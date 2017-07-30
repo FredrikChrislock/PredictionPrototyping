@@ -8,44 +8,44 @@ class model_genotype_config:
 
     ## INPUT CHROMOSOME
     input_min_num_ranges = 10
-    input_max_num_ranges = 50
+    input_max_num_ranges = 20
     input_min_size_range = 1 # power of two
     input_max_size_range = 2 # power of two
 
     ## MODEL CHROMOSOME
     min_num_lstm_layers = 2
-    max_num_lstm_layers = 3
+    max_num_lstm_layers = 4
     min_lstm_layer_size = 2 # power of two
-    max_lstm_layer_size = 4 # power of two
+    max_lstm_layer_size = 8 # power of two
 
     min_num_ffwd_layers = 2
-    max_num_ffwd_layers = 3
+    max_num_ffwd_layers = 4
     min_ffwd_layer_size = 2 # power of two
-    max_ffwd_layer_size = 4 # power of two
+    max_ffwd_layer_size = 8 # power of two
 
 
     ## TARGET CHROMOSOME
-    min_target_range = 20   # minutes
-    max_target_range = 60   # minutes
+    min_target_range = 30   # minutes
+    max_target_range = 90   # minutes
     max_lead_time = 60*3    # minutes
     warning_time = 30       # minutes
 
     ## TRAINING CHROMOSOME
     momentum = 0.9
-    max_learning_rate = 0.05
+    max_learning_rate = 0.01
     min_learning_rate = 0.01
     batch_size = 16
-    num_batches = 20
-    reuse_factor = 6
+    num_batches = 100
+    reuse_factor = 10
 
     ## INCUBATOR SETTINGS
-    num_epochs = 20
+    num_epochs = 50
     mutation_rate = 0.9
     crossover_rate = 0.5
     population_size = 10
     num_generations = 5
-    min_cycle_size = 60*4
-    folder_name = 'C:/Users/FRCHR/OneDrive - DNV GL/SummerProject2017/Data/System80/WashedData'
+    min_cycle_size = 60*6
+    folder_name = 'C:/Users/Fredrik/Documents/WashedData/TurbinA'
 
 # Create a genome based on the above specifications
 class model_genotype:

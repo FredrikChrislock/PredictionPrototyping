@@ -125,18 +125,20 @@ class LSTM_Network:
             for i in range(1, len(_ffwd_array)):
                 layer = _ffwd_array[i]
                 for j in range(len(layer)):
-                    _ffwd_array[i][j] = tf.matmul(_ffwd_array[i-1][j], _ffwd_layers[i][0]) + _ffwd_layers[i][1]
+                    _ffwd_array[i][j] = tf.nn.dropout(tf.matmul(_ffwd_array[i-1][j], _ffwd_layers[i][0]) + _ffwd_layers[i][1], keep_prob=0.8)
             self.predictions += [_ffwd_array[-1][:]]
         print('##', end="", flush=True)
         self.predictions = [tf.stack(sequence) for sequence in self.predictions]
         self.predictions = tf.stack(self.predictions)
         self.predictions = tf.transpose(self.predictions, [1, 0, 2, 3])
         self.predictions = tf.squeeze(self.predictions)
+
         print('##', end="", flush=True)
         # Generate loss-function
         self.target_output = tf.placeholder(dtype=tf.float32, shape=(batch_size, num_steps, output_size), name="target_output")
 
-        self.loss = tf.losses.mean_squared_error(self.target_output, self.predictions) 
+        self.loss = tf.losses.softmax_cross_entropy(self.target_output, self.predictions)
+        self.predictions = tf.nn.softmax(self.predictions)
         print('##', end="", flush=True)
         # Generate trainer
         self.optimizer = tf.train.AdamOptimizer(learning_rate)
@@ -148,7 +150,7 @@ class LSTM_Network:
 
     def lstm_cell(self, num_units):
 
-        return tf.contrib.rnn.BasicLSTMCell(num_units=num_units, state_is_tuple=True)
+        return tf.contrib.rnn.DropoutWrapper(tf.contrib.rnn.BasicLSTMCell(num_units=num_units, state_is_tuple=True), output_keep_prob = 0.8, state_keep_prob=0.8)
 
     def lstm_model(self):
 
