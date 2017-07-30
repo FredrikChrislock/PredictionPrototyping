@@ -186,6 +186,25 @@ class model_genotype:
                                                 1,
                                                 max_sqew) for _ in range(num_dimensions)]
         return ranges
+    def mutate_one_hot_quantizer(self, num_dimensions, min_resolution, max_resolution, max_sqew, quantizer, mutation_rate):
+        output = [self.mutate_multilayer(min_resolution,
+                                         max_resolution,
+                                         1,
+                                         max_sqew,
+                                         ranges,
+                                         mutation_rate) for ranges in quantizer]
+        return output
+    def crossover_one_hot_quantizer(self, parent0, parent1, crossover_rate):
+        child0 = []
+        child1 = []
+        for i in range(len(parent0)):
+            if rnd.random() < crossover_rate:
+                child0 += [parent1[i]]
+                child1 += [parent0[i]]
+            else:
+                child0 += [parent0[i]]
+                child1 += [parent1[i]]
+        return child0, child1
 
     def spawn_genome(self, config, num_dimensions):
         return {'input_ranges' : self.create_random_one_hot_quantizer(num_dimensions, 
@@ -209,9 +228,16 @@ class model_genotype:
 
                 'window_size' : self.create_random_window(15,
                                                           config.min_target_range)}
-
     def mutate_genome(self, config, genome):
         output = genome
+
+        output['input_ranges'] = self.mutate_one_hot_quantizer(num_dimensions, 
+                                                               config.input_min_num_ranges,
+                                                               config.input_max_num_ranges,
+                                                               config.input_max_size_range,
+                                                               genome['input_ranges'],
+                                                               config.mutation_rate)
+
         output['ffwd_layers'] = self.mutate_multilayer(config.min_num_lstm_layers, 
                                                   config.max_num_lstm_layers, 
                                                   config.min_lstm_layer_size, 
@@ -235,6 +261,11 @@ class model_genotype:
         return output
     def mate_genomes(self, config, parent0, parent1):
         output0, output1 = parent0, parent1
+
+        output0['input_ranges'], output1['input_ranges'] = self.crossover_one_hot_quantizer(parent0['input_ranges'],
+                                                                                            parent1['input_ranges'],
+                                                                                            config.crossover_rate)
+
         output0['ffwd_layers'], output1['ffwd_layers'] = self.crossover_multilayer(config.min_num_lstm_layers, 
                                                                               config.max_num_lstm_layers,
                                                                               parent0['ffwd_layers'],
